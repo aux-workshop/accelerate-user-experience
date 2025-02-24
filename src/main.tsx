@@ -12,7 +12,7 @@ const root = createRoot(document.getElementById("root")!);
 
 root.render(
   <StrictMode>
-    <Router>
+    <Router basename="/accelerate-user-experience/">
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />

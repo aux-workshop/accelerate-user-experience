@@ -31,7 +31,7 @@ export default function Home() {
             <p className="text-lg text-[#333] mb-5">
               Elevating User Experience in Accelerator Labs
             </p>
-            <Link to="/event">
+            <Link to="event">
               <button className="bg-[#1e88b6] text-white text-base py-2 px-5 rounded transition-colors duration-300 hover:bg-[#1565a6]">
                 Learn More
               </button>

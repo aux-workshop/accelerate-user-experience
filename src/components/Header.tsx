@@ -35,13 +35,13 @@ export default function Header() {
           <Link to="/" className={`mx-3 ${navTextColor}`}>
             Home
           </Link>
-          <Link to="/about" className={`mx-3 ${navTextColor}`}>
+          <Link to="about" className={`mx-3 ${navTextColor}`}>
             About
           </Link>
-          <Link to="/event" className={`mx-3 ${navTextColor}`}>
+          <Link to="event" className={`mx-3 ${navTextColor}`}>
             Events
           </Link>
-          <Link to="/contact" className={`mx-3 ${navTextColor}`}>
+          <Link to="contact" className={`mx-3 ${navTextColor}`}>
             Contact
           </Link>
         </nav>
