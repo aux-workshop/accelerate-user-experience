@@ -1,5 +1,7 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import emailjs from "emailjs-com";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import fnal from "../assets/fnal.jpg";
 import slac from "../assets/slac.svg";
 import inl from "../assets/inl.png";
@@ -11,37 +13,73 @@ export default function Contact() {
     message: "",
   });
 
+  const [errors, setErrors] = useState({
+    name: "",
+    email: "",
+  });
+
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+
+    // Live validation feedback
+    if (name === "name") {
+      setErrors({ ...errors, name: value.trim() ? "" : "Name is required." });
+    }
+    if (name === "email") {
+      setErrors({
+        ...errors,
+        email: value.trim()
+          ? /^\S+@\S+\.\S+$/.test(value)
+            ? ""
+            : "Enter a valid email address."
+          : "Email is required.",
+      });
+    }
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    emailjs
-      .send(
+    // Final validation check
+    const newErrors = {
+      name: formData.name.trim() ? "" : "Name is required.",
+      email: formData.email.trim()
+        ? /^\S+@\S+\.\S+$/.test(formData.email)
+          ? ""
+          : "Enter a valid email address."
+        : "Email is required.",
+    };
+
+    setErrors(newErrors);
+
+    if (newErrors.name || newErrors.email) return; // Stop submission if errors exist
+
+    try {
+      await emailjs.send(
         "service_qxv7ns8",
         "template_x2ltkte",
         formData,
         "IDsUf6oSbAyhN7Y9Z"
-      )
-      .then(
-        (result) => {
-          console.log("Message sent:", result.text);
-          // Reset form after successful submission
-          setFormData({ name: "", email: "", message: "" });
-        },
-        (error) => {
-          console.log("Error:", error.text);
-        }
       );
+
+      toast.success("Message sent successfully!", { autoClose: 1000 });
+      setFormData({ name: "", email: "", message: "" }); // Reset form
+      setErrors({ name: "", email: "" }); // Clear errors
+    } catch (error) {
+      toast.error("Failed to send message. Please try again.", {
+        autoClose: 2000,
+      });
+      console.error("Error:", error);
+    }
   };
 
   return (
     <div>
+      <ToastContainer position="top-right" />
+
       {/* Top section with blue background */}
       <section className="h-[70vh] bg-[#1e88b6] flex flex-col items-center justify-center text-center">
         <h1 className="text-6xl font-bold text-white mb-4">Organizers</h1>
@@ -52,7 +90,7 @@ export default function Contact() {
         </p>
       </section>
 
-      {/* Middle section with additional info */}
+      {/* Middle section */}
       <section className="py-10 bg-white flex flex-col items-center text-center">
         <p className="text-lg text-gray-700 max-w-3xl mb-6">
           Launched in 2025, this initiative focuses on the importance of UI/UX
@@ -63,20 +101,20 @@ export default function Contact() {
           workshops.
         </p>
         <div className="flex justify-center space-x-4 mb-8">
-          {" "}
           <img src={inl} alt="INL Logo" className="h-16" />
           <img src={fnal} alt="FNAL Logo" className="h-16" />
           <img src={slac} alt="SLAC Logo" className="h-16" />
         </div>
       </section>
 
-      {/* Section for contact form */}
+      {/* Contact Form */}
       <section className="py-20 bg-gray-100 flex flex-col items-center justify-center">
         <h2 className="text-4xl font-bold mb-8">Contact Us</h2>
         <form onSubmit={handleSubmit} className="max-w-lg w-full">
+          {/* Name input */}
           <div className="mb-4">
             <label htmlFor="name" className="block text-gray-700 mb-2">
-              Name
+              Name <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -84,13 +122,19 @@ export default function Contact() {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded"
-              required
+              className={`w-full p-2 border ${
+                errors.name ? "border-red-500" : "border-gray-300"
+              } rounded`}
             />
+            {errors.name && (
+              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+            )}
           </div>
+
+          {/* Email input */}
           <div className="mb-4">
             <label htmlFor="email" className="block text-gray-700 mb-2">
-              Email
+              Email <span className="text-red-500">*</span>
             </label>
             <input
               type="email"
@@ -98,10 +142,16 @@ export default function Contact() {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded"
-              required
+              className={`w-full p-2 border ${
+                errors.email ? "border-red-500" : "border-gray-300"
+              } rounded`}
             />
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+            )}
           </div>
+
+          {/* Message input (optional) */}
           <div className="mb-4">
             <label htmlFor="message" className="block text-gray-700 mb-2">
               Message (optional)
@@ -114,6 +164,8 @@ export default function Contact() {
               className="w-full p-2 border border-gray-300 rounded"
             />
           </div>
+
+          {/* Submit button */}
           <button
             type="submit"
             className="bg-[#1e88b6] text-white py-2 px-5 rounded transition-colors duration-300 hover:bg-[#1565a6]"
